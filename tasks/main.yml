@@ -1,0 +1,19 @@
+---
+
+- name: Install ntp
+  package:
+    name: ntp
+    state: present
+  tags:
+   - ntp
+   - ntp-install
+
+- name: Ensure ntp service is started
+  service:
+    name: ntpd
+    state: started
+    enabled: true
+  tags:
+   - ntp
+   - ntp-install
+

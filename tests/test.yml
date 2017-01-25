@@ -1,0 +1,12 @@
+---
+
+- name: Run integration tests
+  hosts: all
+  become: true
+
+  tasks:
+
+  - name: Check that ntp is synchronised
+    command: ntpstat
+    tags:
+      - integration-test
