@@ -8,4 +8,4 @@
     - ntp
 
 - include: test.yml
-  when: run_tests is defined and run_tests
+  when: run_tests|default() | bool

@@ -1,6 +1,6 @@
 ---
 
-- name: Run integration tests
+- name: Run functional tests
   hosts: all
   become: true
 
@@ -8,5 +8,6 @@
 
   - name: Check that ntp is synchronised
     command: ntpstat
+    changed_when: false
     tags:
-      - integration-test
+      - functional-test

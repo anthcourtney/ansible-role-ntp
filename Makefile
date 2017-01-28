@@ -1,14 +1,18 @@
-# Main goals
+clean: vagrant-destroy cleanup-roles
 
-clean: vagrant-destroy
+create: vagrant-up
 
-test: requirements vagrant-up syntax-check vagrant-provision idempotency-test integration-test
+prepare: requirements role-under-test syntax-check
 
-# Helper goals
+converge: vagrant-provision
 
-## Setup 
+setup: create prepare converge
 
-requirements: role-under-test
+test: idempotency-test functional-test
+
+# Prepare helpers
+
+requirements:
 	@ansible-galaxy install -r tests/requirements.yml -p tests/roles -f
 
 role-under-test:
@@ -16,13 +20,13 @@ role-under-test:
 	@mkdir -p tests/roles/ntp
 	@rsync -az --exclude tests . tests/roles/ntp/
 
-## Tests
-
 syntax-check:
 	@echo 'Running syntax-check'
 	@cd tests && ansible-playbook -i localhost, --syntax-check --list-tasks site.yml \
 	  && (echo 'Passed syntax-check'; exit 0) \
 	  || (echo 'Failed syntax-check'; exit 1)
+
+# Test helpers
 
 idempotency-test:
 	@echo 'Running idempotency test'
@@ -31,19 +35,31 @@ idempotency-test:
 	  && (echo 'Passed idempotency test'; exit 0) \
 	  || (echo "Failed idempotency test"; exit 1)
 
-integration-test:
-	@echo 'Running integration test'
+functional-test:
+	@echo 'Running functional test'
 	@RUN_TESTS=true ${MAKE} vagrant-provision \
-	  && (echo 'Passed integration test'; exit 0) \
-	  || (echo 'Failed integration test'; exit 1)
+	  && (echo 'Passed functional test'; exit 0) \
+	  || (echo 'Failed functional test'; exit 1)
 
-## Vagrant
-	
-vagrant-up:
-	@cd tests && vagrant up --no-provision
+# Cleanup helpers
+
+cleanup-roles:
+	@if [ -d tests/roles ]; then rm -rf tests/roles; fi
 
 vagrant-destroy:
 	@cd tests && vagrant destroy -f
 
+# Create helpers
+	
+vagrant-up:
+	@cd tests && vagrant up --no-provision
+
+# Converge helpers
+
 vagrant-provision:
 	@cd tests && vagrant provision
+
+# Misc helpers
+
+vagrant-ssh:
+	@cd tests && vagrant ssh
